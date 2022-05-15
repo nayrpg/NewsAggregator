@@ -1,0 +1,21 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Main</title>
+  <script src="main.js"></script>
+</head>
+
+<body>
+  <div id="myapp"></div>
+  <script>
+    var app = Elm.Main.init({
+      node: document.getElementById('myapp')
+    });
+    app.ports.storeState.subscribe(function (articles) {
+      localStorage.setItem('articles-app-save', articles);
+      console.log("Saved state: ", articlesJson);
+    });
+    window.addEventListener("load", app.ports.loadState.send(localStorage.getItem('articles-app-save')));
+  </script>
+</body>
+</html>
