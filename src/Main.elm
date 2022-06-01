@@ -29,7 +29,7 @@ type alias Model = {
   }
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
   Ports.loadState LoadState
 
 -- TODO: Implement loading from disk  
@@ -59,10 +59,9 @@ view model =
         input [type_ "text", id "new_name", value model.new_article.name, onInput NameEntered] [],
         label [for "new_url"] [text "URL :"],
         input [type_ "text", id "new_url", value model.new_article.url, onInput URLEntered] [],
-        input [type_ "submit"] [ text "Submit" ],
-      -- TODO: Implement submit new article
-        ul [] (articleListToView [model.new_article])
-      ]
+        input [type_ "submit"] [ text "Submit" ]
+      ],
+      ul [] (articleListToView [model.new_article])
       
     ],
     div [] [
@@ -91,7 +90,8 @@ articleListToView article_list =
                     input [type_ "checkbox", id "read", onClick (ToggleRead article.id), checked article.read] [],
                     -- TODO: Implement marking as pinned
                     label [for "pinned"] [text "Pinned: "],
-                    input [type_ "checkbox", id "pinned", onClick (TogglePinned article.id), checked article.pinned] []
+                    input [type_ "checkbox", id "pinned", onClick (TogglePinned article.id), checked article.pinned] [],
+                    button [style "font-size" "24px", onClick (DeleteArticle article.id)] [ text "🗑" ]
                   ]
                 )
 
@@ -119,7 +119,8 @@ type Msg =
   SubmitNewArticle |
   TogglePinned Int |
   ToggleRead Int |
-  LoadState String
+  LoadState String |
+  DeleteArticle Int
 
   -- PinnedChange Bool |
   -- ReadChange Bool
@@ -209,7 +210,7 @@ update msg model =
         result = Decode.decodeString stateDecoder (Debug.log "loaded_json" articles_str)
       in
       case Debug.log "result" result of
-        Err error ->
+        Err _ ->
           ({ model | articles = [] }, Cmd.none) 
         Ok loaded_state ->
           ({ 
@@ -217,6 +218,15 @@ update msg model =
               articles = loaded_state.articles,
               next_id = loaded_state.next_id
           }, Cmd.none) 
+    DeleteArticle id ->
+      let
+        updated_articles = model.articles
+          |> List.filter (\article -> article.id /= id)
+        new_model = {
+            model | articles = updated_articles
+          }
+      in
+      (new_model, saveState new_model)
     --TODO: decode JSON
 newBlankArticle : Article
 newBlankArticle =
