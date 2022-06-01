@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "dist" : "mkdir -p deliverables && elm make --output=deliverables/main.js src/Main.elm && cp src/index.html deliverables"
+    "dist_local" : "mkdir -p deliverables && elm make --output=deliverables/static/main.js src/Main.elm && cp src/index.html deliverables/static",
+    "dist_server" : "npm run dist_local && cp backend_src/* deliverables",
+    "run_server" : "npm run dist_server && source venv/Scripts/activate && FLASK_APP=deliverables/backend flask run"
   },
   "devDependencies": {
     "elm": "^0.19.1-5"
